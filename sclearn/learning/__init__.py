@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from .model import generate_lgbbo
 from .model import generate_models
@@ -15,9 +16,10 @@ def train_models(x_train, y_train):
     lgb_bo = generate_lgbbo(x_train, y_train)
     models = generate_models(lgb_bo, x_train, y_train)
 
-    return models, lgb_bo, swap_table
+    return models, lgb_bo
 
-def test_models(models, swap_table, x_test):
+def test_models(models, x_test):
+    swap_table = get_swap_table(x_test)
     x_test = swap_x_data(x_test, swap_table)
 
     preds = []
@@ -27,4 +29,7 @@ def test_models(models, swap_table, x_test):
     pred = np.mean(preds, axis=0)
     pred = swap_y_data(pred, swap_table)
 
-    return pred
+    submission = pd.DataFrame(data=pred, index=x_test.index, columns=['winner'])
+    submission.index.name = 'game_id'
+
+    return submission
