@@ -1,6 +1,6 @@
 import numpy as np
 
-from .extract_gamestates import GameState
+from .extract_game_states import GameState
 
 
 class AbilityCounts(GameState):
