@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def _species_converter(string):
     if string == 'T':
         return 0
@@ -16,5 +19,9 @@ def extract_species(df):
     species_df.columns.name = None
 
     species_df = species_df.applymap(_species_converter)
+
+    cat_dtype = pd.api.types.CategoricalDtype(
+        categories=[0, 1, 2], ordered=True)
+    species_df = species_df.astype(cat_dtype)
 
     return species_df
