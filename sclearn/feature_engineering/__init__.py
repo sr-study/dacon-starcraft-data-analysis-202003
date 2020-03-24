@@ -3,7 +3,7 @@ import multiprocessing
 
 import numpy as np
 import pandas as pd
-
+from .first_unit_time import FirstUnityTime
 from .ability_counts import AbilityCounts
 from .camera_state import CameraState
 from .extract_event_counts import extract_event_counts
@@ -24,6 +24,7 @@ def prepare_x_data(df):
     features.append(extract_game_states(df, [
         CameraState(),
         AbilityCounts(),
+        FirstUnityTime(),
     ]))
 
     return pd.concat(features, axis=1)
