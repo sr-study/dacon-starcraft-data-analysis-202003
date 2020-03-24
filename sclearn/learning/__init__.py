@@ -16,10 +16,11 @@ def train_models(x_train, y_train):
     x_train = swap_x_data(x_train, swap_table)
     y_train = swap_y_data(y_train, swap_table)
 
-    splits_filename = 'forced_splits_0.json'
-    with open(splits_filename, 'w') as f:
-        splits_tree = create_forced_splits_tree(x_train)
-        json.dump(splits_tree, f)
+    splits_filename = None
+    # splits_filename = 'forced_splits_0.json'
+    # with open(splits_filename, 'w') as f:
+    #     splits_tree = create_forced_splits_tree(x_train)
+    #     json.dump(splits_tree, f)
 
     lgb_bo = generate_lgbbo(x_train, y_train, forced_splits=splits_filename)
     models = generate_models(lgb_bo, x_train, y_train, forced_splits=splits_filename)
