@@ -31,19 +31,13 @@ def prepare_x_data(df):
 
     x_data = pd.concat(features, axis='columns', copy=False)
 
-    del features
-    gc.collect()
-
     features = [
         x_data,
-        extract_slave(x_data),
-        extract_gas_building(x_data),
+        # extract_slave(x_data),
+        # extract_gas_building(x_data),
     ]
 
     x_data = pd.concat(features, axis='columns', copy=False)
-
-    del features
-    gc.collect()
 
     return x_data
 
