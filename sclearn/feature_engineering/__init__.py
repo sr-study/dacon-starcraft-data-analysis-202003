@@ -8,7 +8,9 @@ from .ability_counts import AbilityCounts
 from .camera_state import CameraState
 from .extract_event_counts import extract_event_counts
 from .extract_game_states import extract_game_states
+from .extract_gas_building import extract_gas_building
 from .extract_playtime import extract_playtime
+from .extract_slave import extract_slave
 from .extract_species import extract_species
 from .extract_winner import extract_winner
 
@@ -27,7 +29,17 @@ def prepare_x_data(df):
         FirstUnityTime(),
     ]))
 
-    return pd.concat(features, axis=1)
+    x_data = pd.concat(features, axis='columns', copy=False)
+
+    features = [
+        x_data,
+        # extract_slave(x_data),
+        # extract_gas_building(x_data),
+    ]
+
+    x_data = pd.concat(features, axis='columns', copy=False)
+
+    return x_data
 
 def prepare_y_data(df):
     winners = extract_winner(df)
@@ -59,3 +71,15 @@ def parallelize_dataframe(func, df, n_cores=None):
     gc.collect()
 
     return df
+
+def chunkize_dataframe(func, df, n_splits=10):
+    assert n_splits > 0
+
+    df_split = split_dataframe_by_game_id(df, n_splits)
+    results = []
+
+    for sub_df in df_split:
+        results.append(func(sub_df))
+        gc.collect()
+
+    return pd.concat(results, axis='rows', copy=False)
