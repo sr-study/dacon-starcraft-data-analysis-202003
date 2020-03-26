@@ -1,12 +1,38 @@
-import numpy as np                          # 계산 라이브러리
-from sklearn.metrics import roc_auc_score   # AUC 스코어 계산
-from sklearn.model_selection import KFold   # K-fold CV    
-from bayes_opt import BayesianOptimization  # 베이지안 최적화 라이브러리  
-from functools import partial               # 함수 변수 고정
-import lightgbm as lgb                      # LightGBM 라이브러리
+import numpy as np
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import KFold
+from bayes_opt import BayesianOptimization
+from functools import partial
+import lightgbm as lgb
 
 
-def lgb_cv(num_leaves, learning_rate, n_estimators, subsample, colsample_bytree, reg_alpha, reg_lambda, bagging_fraction, feature_fraction, x_data=None, y_data=None, n_splits=5, output='score'):
+def create_forced_splits_tree(x_data):
+    p0_species = x_data.columns.get_loc('p0_species')
+    p1_species = x_data.columns.get_loc('p1_species')
+
+    return {
+        "feature": p0_species,
+        "threshold": 0,
+        "left": {
+            "feature": p1_species,
+            "threshold": 0,
+            "right": {
+                "feature": p1_species,
+                "threshold": 1,
+            },
+        },
+        "right": {
+            "feature": p0_species,
+            "threshold": 1,
+            "left": {
+                "feature": p1_species,
+                "threshold": 1,
+            },
+        }
+    }
+
+
+def lgb_cv(num_leaves, learning_rate, n_estimators, subsample, colsample_bytree, reg_alpha, reg_lambda, bagging_fraction, feature_fraction, x_data=None, y_data=None, n_splits=5, forced_splits=None, output='score'):
     score = 0
     kf = KFold(n_splits=n_splits)
     models = []
@@ -24,6 +50,7 @@ def lgb_cv(num_leaves, learning_rate, n_estimators, subsample, colsample_bytree,
             reg_lambda = reg_lambda,
             bagging_fraction = bagging_fraction,
             feature_fraction = feature_fraction,
+            forced_splits = forced_splits,
         )
         
         model.fit(x_train, y_train)
@@ -39,9 +66,9 @@ def lgb_cv(num_leaves, learning_rate, n_estimators, subsample, colsample_bytree,
         return models
 
 
-def generate_lgbbo(x_train, y_train):
+def generate_lgbbo(x_train, y_train, forced_splits=None):
     # 모델과 관련없는 변수 고정
-    func_fixed = partial(lgb_cv, x_data=x_train, y_data=y_train, n_splits=5, output='score') 
+    func_fixed = partial(lgb_cv, forced_splits=forced_splits, x_data=x_train, y_data=y_train, n_splits=5, output='score') 
     # 베이지안 최적화 범위 설정
     lgbBO = BayesianOptimization(
         func_fixed, 
@@ -67,7 +94,7 @@ def generate_lgbbo(x_train, y_train):
     return lgbBO
 
 
-def generate_models(lgb_bo, x_train, y_train):
+def generate_models(lgb_bo, x_train, y_train, forced_splits=None):
     params = lgb_bo.max['params']
     models = lgb_cv(
         params['num_leaves'], 
@@ -79,5 +106,6 @@ def generate_models(lgb_bo, x_train, y_train):
         params['reg_lambda'],
         params['bagging_fraction'],
         params['feature_fraction'],
+        forced_splits=forced_splits,
         x_data=x_train, y_data=y_train, n_splits=5, output='model')
     return models
