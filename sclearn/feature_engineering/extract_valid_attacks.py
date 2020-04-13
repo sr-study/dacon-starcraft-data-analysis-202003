@@ -32,6 +32,49 @@ def calc_p0_valid_attack(row):
     return row
 
 
+def calc_p0_attack_position(row):
+    p0_attack_x_list = row['p0_attack_x']
+    p0_attack_y_list = row['p0_attack_y']
+
+    p0_base_x_list = row['p0_base_x']
+    p0_base_y_list = row['p0_base_y']
+
+    p1_base_x_list = row['p1_base_x']
+    p1_base_y_list = row['p1_base_y']
+
+    base_cnt = 0
+    enemy_cnt = 0
+    for i in range(len(p0_attack_x_list)):
+        min_dist = 987654321.0
+        flag = 0
+
+        for j in range(len(p0_base_x_list)):
+            cur_dist = ((p0_base_x_list[j] - p0_attack_x_list[i]) ** 2) + \
+                       ((p0_base_y_list[j] - p0_attack_y_list[i]) ** 2)
+
+            if cur_dist < min_dist:
+                flag = 0
+                min_dist = cur_dist
+
+        for j in range(len(p1_base_x_list)):
+            cur_dist = ((p1_base_x_list[j] - p0_attack_x_list[i]) ** 2) + \
+                       ((p1_base_y_list[j] - p0_attack_y_list[i]) ** 2)
+
+            if cur_dist < min_dist:
+                flag = 1
+                min_dist = cur_dist
+
+        if flag == 0:
+            base_cnt += 1
+        else:
+            enemy_cnt += 1
+
+    row['p0_base_attack'] = base_cnt
+    row['p0_enemy_attack'] = enemy_cnt
+
+    return row
+
+
 def calc_p1_valid_attack(row):
     p1_attack_x_list = row['p1_attack_x']
     p1_attack_y_list = row['p1_attack_y']
@@ -52,6 +95,49 @@ def calc_p1_valid_attack(row):
             cnt += 1
 
     row['p1_valid_attack'] = cnt
+    return row
+
+
+def calc_p1_attack_position(row):
+    p1_attack_x_list = row['p1_attack_x']
+    p1_attack_y_list = row['p1_attack_y']
+
+    p0_base_x_list = row['p0_base_x']
+    p0_base_y_list = row['p0_base_y']
+
+    p1_base_x_list = row['p1_base_x']
+    p1_base_y_list = row['p1_base_y']
+
+    base_cnt = 0
+    enemy_cnt = 0
+
+    for i in range(len(p1_attack_x_list)):
+        min_dist = 987654321.0
+        flag = 0
+        for j in range(len(p1_base_x_list)):
+            cur_dist = ((p1_base_x_list[j] - p1_attack_x_list[i]) ** 2) + \
+                       ((p1_base_y_list[j] - p1_attack_y_list[i]) ** 2)
+
+            if cur_dist < min_dist:
+                flag = 0
+                min_dist = cur_dist
+
+        for j in range(len(p0_base_x_list)):
+            cur_dist = ((p0_base_x_list[j] - p1_attack_x_list[i]) ** 2) + \
+                       ((p0_base_y_list[j] - p1_attack_y_list[i]) ** 2)
+
+            if cur_dist < min_dist:
+                flag = 1
+                min_dist = cur_dist
+
+        if flag == 0:
+            base_cnt += 1
+        else:
+            enemy_cnt += 1
+
+    row['p1_base_attack'] = base_cnt
+    row['p1_enemy_attack'] = enemy_cnt
+
     return row
 
 
@@ -209,7 +295,12 @@ def extract_base_attack_cnt(df):
 
     listed_df = listed_df.apply(calc_p0_valid_attack, axis=1)
     listed_df = listed_df.apply(calc_p1_valid_attack, axis=1)
+
+    listed_df = listed_df.apply(calc_p0_attack_position, axis=1)
+    listed_df = listed_df.apply(calc_p1_attack_position, axis=1)
+
     listed_df['delta_valid_attack'] = listed_df['p0_valid_attack'] - listed_df['p1_valid_attack']
     listed_df = listed_df.set_index('game_id')
 
-    return listed_df[['p0_valid_attack', 'p1_valid_attack', 'delta_valid_attack']]
+    return listed_df[['p0_valid_attack', 'p1_valid_attack', 'delta_valid_attack', 'p0_base_attack', 'p0_enemy_attack',
+                      'p1_base_attack', 'p1_enemy_attack']]
