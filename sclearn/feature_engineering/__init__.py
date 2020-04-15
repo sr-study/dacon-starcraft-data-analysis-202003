@@ -6,7 +6,9 @@ import pandas as pd
 from .first_unit_time import FirstUnityTime
 from .ability_counts import AbilityCounts
 from .camera_state import CameraState
+from .extract_apm import extract_apm
 from .extract_event_counts import extract_event_counts
+from .extract_extra_supply import extract_extra_supply
 from .extract_game_states import extract_game_states
 from .extract_gas_building import extract_gas_building
 from .extract_playtime import extract_playtime
@@ -36,9 +38,11 @@ def prepare_x_data(df):
 
     features = [
         x_data,
+        extract_apm(x_data),
         # extract_slave(x_data),
         # extract_gas_building(x_data),
-        cluster_with_features(x_data)
+        extract_extra_supply(x_data),
+        cluster_with_features(x_data),
     ]
 
     x_data = pd.concat(features, axis='columns', copy=False)
