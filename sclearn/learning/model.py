@@ -66,14 +66,14 @@ def lgb_cv(num_leaves, learning_rate, n_estimators, subsample, colsample_bytree,
         return models
 
 
-def generate_lgbbo(x_train, y_train, forced_splits=None):
+def generate_lgbbo(x_train, y_train, forced_splits=None, random_state=4321):
     # 모델과 관련없는 변수 고정
-    func_fixed = partial(lgb_cv, forced_splits=forced_splits, x_data=x_train, y_data=y_train, n_splits=5, output='score') 
+    func_fixed = partial(lgb_cv, forced_splits=forced_splits, x_data=x_train, y_data=y_train, n_splits=5, output='score')
     # 베이지안 최적화 범위 설정
     lgbBO = BayesianOptimization(
         func_fixed, 
         {
-            'num_leaves': (256, 2048),        # num_leaves,       범위(16~1024)
+            'num_leaves': (16, 256),        # num_leaves,       범위(16~1024)
             'learning_rate': (0.0001, 0.1),  # learning_rate,    범위(0.0001~0.1)
             'n_estimators': (16, 1024),      # n_estimators,     범위(16~1024)
             'subsample': (0, 0.5),             # subsample,        범위(0~1)
@@ -83,7 +83,7 @@ def generate_lgbbo(x_train, y_train, forced_splits=None):
             'bagging_fraction': (0.5, 1.0),
             'feature_fraction': (0.5, 1.0),
         }, 
-        random_state=4321                    # 시드 고정
+        random_state=random_state                    # 시드 고정
     )
     lgbBO.maximize(init_points=5, n_iter=5) # 처음 5회 랜덤 값으로 score 계산 후 30회 최적화
 
