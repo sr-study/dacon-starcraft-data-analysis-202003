@@ -22,12 +22,15 @@ class CameraState(GameState):
                 self.p1_camera_y.append(camera_y)
 
     def to_dict(self):
-        return {
+        row = {
             'p0_camera_x_var': np.var(self.p0_camera_x),
             'p0_camera_y_var': np.var(self.p0_camera_y),
             'p1_camera_x_var': np.var(self.p1_camera_x),
             'p1_camera_y_var': np.var(self.p1_camera_y),
         }
+        row['delta_camera_x_var'] = row['p0_camera_x_var'] - row['p1_camera_x_var']
+        row['delta_camera_y_var'] = row['p0_camera_y_var'] - row['p1_camera_y_var']
+        return row
 
     @staticmethod
     def parse_at(event_contents):
