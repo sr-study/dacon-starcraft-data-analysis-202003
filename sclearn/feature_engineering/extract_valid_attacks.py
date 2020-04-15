@@ -300,7 +300,9 @@ def extract_base_attack_cnt(df):
     listed_df = listed_df.apply(calc_p1_attack_position, axis=1)
 
     listed_df['delta_valid_attack'] = listed_df['p0_valid_attack'] - listed_df['p1_valid_attack']
+    listed_df['delta_base_attack'] = listed_df['p0_base_attack'] - listed_df['p1_base_attack']
+    listed_df['delta_enemy_attack'] = listed_df['p0_enemy_attack'] - listed_df['p1_enemy_attack']
     listed_df = listed_df.set_index('game_id')
 
     return listed_df[['p0_valid_attack', 'p1_valid_attack', 'delta_valid_attack', 'p0_base_attack', 'p0_enemy_attack',
-                      'p1_base_attack', 'p1_enemy_attack']]
+                      'p1_base_attack', 'p1_enemy_attack', 'delta_base_attack', 'delta_enemy_attack']]
