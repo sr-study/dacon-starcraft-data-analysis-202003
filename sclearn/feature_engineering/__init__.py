@@ -15,6 +15,8 @@ from .extract_playtime import extract_playtime
 from .extract_slave import extract_slave
 from .extract_species import extract_species
 from .extract_winner import extract_winner
+from .extract_valid_attacks import extract_base_attack_cnt
+from .cluster_with_features import cluster_with_features
 
 
 def prepare_x_data(df):
@@ -25,6 +27,7 @@ def prepare_x_data(df):
     features.append(extract_playtime(df))
     features.append(extract_species(df))
     features.append(extract_event_counts(df))
+    features.append(extract_base_attack_cnt(df))
     features.append(extract_game_states(df, [
         CameraState(),
         AbilityCounts(),
@@ -39,6 +42,7 @@ def prepare_x_data(df):
         # extract_slave(x_data),
         # extract_gas_building(x_data),
         extract_extra_supply(x_data),
+        cluster_with_features(x_data),
     ]
 
     x_data = pd.concat(features, axis='columns', copy=False)
